@@ -1,1 +1,333 @@
 
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>داروشناسیAi | دستیار هوشمند دارویی و یادآور سلامت</title>
+  <meta name="description" content="دستیار دارویی هوشمند، آلارم و یادآور مصرف دارو، تاریخچه محلی و بانک دارویی به زبان فارسی">
+  <meta name="theme-color" content="#0C101A">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              gold: '#D4A017',
+              goldLight: '#F3C760',
+              goldDark: '#A67C00',
+              navy: '#0C101A',
+              surface: '#141B2B',
+              card: '#1D263B',
+              border: '#2C3955',
+              green: '#10B981',
+              red: '#EF4444',
+              teal: '#0EA5E9',
+              amber: '#F59E0B'
+            }
+          },
+          fontFamily: {
+            sans: ['Vazirmatn', 'Tahoma', 'Segoe UI', 'sans-serif'],
+            mono: ['Courier New', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700;800&display=swap');
+    body {
+      font-family: 'Vazirmatn', Tahoma, sans-serif;
+      background-color: #0C101A;
+      color: #F8FAFC;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    input, textarea {
+      user-select: text;
+    }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #141B2B;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2C3955;
+      border-radius: 4px;
+    }
+    /* Pulsing animation for microphone */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    .pulse-recording {
+      animation: pulse-ring 1.5s infinite;
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-100 bg-[#0C101A]">
+
+  <!-- Top App Header -->
+  <header class="sticky top-0 z-30 bg-[#141B2B]/95 backdrop-blur border-b border-[#2C3955] px-4 py-3 shadow-lg">
+    <div class="max-w-2xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <!-- Hygeia Symbol SVG (Black Snake on Golden Bowl) -->
+        <div class="w-12 h-12 rounded-2xl bg-[#1D263B] border-2 border-[#D4A017]/70 flex items-center justify-center p-1.5 shadow-md shadow-black/40 flex-shrink-0">
+          <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow">
+            <!-- Polished Golden Bowl / Chalice -->
+            <path d="M22 36 Q50 48 78 36 L70 54 Q50 70 30 54 Z" fill="url(#goldGradient)" />
+            <path d="M46 64 L44 82 L34 88 L66 88 L56 82 L54 64 Z" fill="url(#goldGradientDark)" />
+            <!-- Coiled Black Snake with Gold Highlights -->
+            <path d="M50 14 C40 14 36 22 42 28 C48 34 62 30 62 42 C62 56 42 54 38 66 C35 74 46 80 50 82" 
+                  fill="none" stroke="#111827" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M50 14 C40 14 36 22 42 28 C48 34 62 30 62 42 C62 56 42 54 38 66 C35 74 46 80 50 82" 
+                  fill="none" stroke="#F3C760" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <!-- Snake Head -->
+            <ellipse cx="50" cy="14" rx="5" ry="4" fill="#111827" />
+            <circle cx="48" cy="13" r="1.2" fill="#F3C760" />
+            <!-- Linear Gradients -->
+            <defs>
+              <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FCE588" />
+                <stop offset="50%" stop-color="#D4A017" />
+                <stop offset="100%" stop-color="#A67C00" />
+              </linearGradient>
+              <linearGradient id="goldGradientDark" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#D4A017" />
+                <stop offset="100%" stop-color="#785500" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-extrabold text-[#D4A017] tracking-tight">داروشناسیAi</h1>
+            <span class="text-[11px] bg-[#D4A017]/20 text-[#F3C760] font-semibold px-2 py-0.5 rounded-full border border-[#D4A017]/30">دستیار سلامت</span>
+          </div>
+          <p class="text-xs text-slate-400">دستیار مهربان، امن و دقیق دارویی</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="quickTestAlarmBtn" class="text-xs bg-[#1D263B] hover:bg-[#2C3955] text-[#D4A017] border border-[#D4A017]/50 px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition">
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+          <span>تست زنگ</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Permanent Persian Privacy Banner (Required) -->
+    <div class="max-w-2xl mx-auto mt-2.5 bg-[#10B981]/15 border border-[#10B981]/40 rounded-xl px-3.5 py-2 flex items-center gap-2.5 shadow-sm">
+      <svg class="w-5 h-5 text-[#10B981] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+      </svg>
+      <p class="text-[12px] md:text-[13px] text-emerald-200 font-medium leading-snug">
+        اطلاعات و تاریخچه مصرف داروی شما فقط روی گوشی خودتان ذخیره می‌شود و کاملاً محرمانه است.
+      </p>
+    </div>
+  </header>
+
+  <!-- Main Content Container (Tabs) -->
+  <main class="flex-1 max-w-2xl w-full mx-auto p-4 pb-28">
+
+    <!-- TAB 1: مشاور هوشمند (Smart AI Advisor) -->
+    <section id="tab-advisor" class="tab-content flex flex-col h-full space-y-3">
+      <!-- Quick Prompts Chips -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
+        <button class="quick-prompt whitespace-nowrap bg-[#1D263B] border border-[#2C3955] hover:border-[#D4A017] text-slate-200 px-3 py-1.5 rounded-full transition">تداخل آسپرین با ایبوپروفن</button>
+        <button class="quick-prompt whitespace-nowrap bg-[#1D263B] border border-[#2C3955] hover:border-[#D4A017] text-slate-200 px-3 py-1.5 rounded-full transition">بهترین زمان مصرف متفورمین</button>
+        <button class="quick-prompt whitespace-nowrap bg-[#1D263B] border border-[#2C3955] hover:border-[#D4A017] text-slate-200 px-3 py-1.5 rounded-full transition">عوارض شایع لوزارتان</button>
+        <button class="quick-prompt whitespace-nowrap bg-[#1D263B] border border-[#2C3955] hover:border-[#D4A017] text-slate-200 px-3 py-1.5 rounded-full transition">فراموش کردن دوز دارو</button>
+        <button class="quick-prompt whitespace-nowrap bg-[#1D263B] border border-[#2C3955] hover:border-[#D4A017] text-slate-200 px-3 py-1.5 rounded-full transition">پنتوپرازول قبل یا بعد غذا؟</button>
+      </div>
+
+      <!-- Chat Messages Scroll Container -->
+      <div id="chatMessages" class="flex-1 bg-[#141B2B] rounded-2xl border border-[#2C3955] p-3.5 space-y-3.5 overflow-y-auto min-h-[380px] max-h-[58vh]">
+        <!-- Welcome Message -->
+        <div class="flex flex-col items-start gap-1">
+          <div class="flex items-center gap-1.5 text-xs text-[#D4A017] font-bold px-1">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <span>مشاور هوشمند داروشناسی</span>
+          </div>
+          <div class="bg-[#1D263B] text-slate-100 text-sm leading-relaxed rounded-2xl rounded-tr-sm p-3.5 border border-[#2C3955] max-w-[95%] shadow-sm">
+            سلام و درود! من دستیار هوشمند داروشناسی شما هستم.
+            می‌توانید درباره هر دارویی، نحوه و زمان مصرف، عوارض جانبی یا تداخلات دارویی از من بپرسید. همچنین می‌توانید با زدن روی میکروفون به صورت صوتی صحبت کرده یا از عکس جعبه قرص استفاده نمایید.
+            <div class="mt-2 pt-2 border-t border-[#2C3955] text-xs text-amber-400 flex items-center gap-1">
+              <span>⚠️ توجه: پاسخ‌ها جنبه اطلاع‌رسانی داشته و نظر پزشک معالج همواره اصل است.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image Preview Thumbnail (If captured) -->
+      <div id="imagePreviewContainer" class="hidden bg-[#1D263B] border border-[#2C3955] rounded-xl p-2 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <img id="previewImg" class="w-14 h-14 object-cover rounded-lg border border-[#D4A017]" alt="پیش نمایش">
+          <div>
+            <p class="text-xs font-bold text-slate-200">عکس جعبه یا نسخه ضمیمه شد</p>
+            <p class="text-[11px] text-slate-400">هوش مصنوعی تصویر دارو را تحلیل خواهد کرد</p>
+          </div>
+        </div>
+        <button id="removeImageBtn" class="text-rose-400 hover:text-rose-300 p-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Input Bar (Speech, Camera, Gallery, Text, Send) -->
+      <div class="bg-[#141B2B] p-2.5 rounded-2xl border border-[#2C3955] shadow-md flex items-center gap-2">
+        <!-- Voice Input Button (Web Speech fa-IR) -->
+        <button id="voiceBtn" title="جستجوی صوتی به زبان فارسی" class="w-12 h-12 rounded-xl bg-[#D4A017]/20 border border-[#D4A017]/40 text-[#F3C760] hover:bg-[#D4A017]/30 flex items-center justify-center flex-shrink-0 transition active:scale-95">
+          <svg id="voiceIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+          </svg>
+        </button>
+
+        <!-- Camera Capture Button (Environment Camera) -->
+        <label for="cameraInput" title="عکس‌برداری مستقیم از جعبه قرص" class="w-11 h-11 rounded-xl bg-[#1D263B] border border-[#2C3955] text-slate-300 hover:text-white hover:border-[#D4A017] flex items-center justify-center flex-shrink-0 cursor-pointer transition active:scale-95">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
+        </label>
+
+        <!-- Gallery Pick Button -->
+        <label for="galleryInput" title="انتخاب تصویر از گالری" class="w-11 h-11 rounded-xl bg-[#1D263B] border border-[#2C3955] text-slate-300 hover:text-white hover:border-[#D4A017] flex items-center justify-center flex-shrink-0 cursor-pointer transition active:scale-95">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          <input type="file" id="galleryInput" accept="image/*" class="hidden">
+        </label>
+
+        <!-- Text Input -->
+        <input type="text" id="chatInput" placeholder="نام دارو یا پرسش دارویی را بنویسید..." 
+               class="flex-1 bg-[#0C101A] border border-[#2C3955] focus:border-[#D4A017] rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-400 outline-none transition">
+
+        <!-- Send Button -->
+        <button id="sendBtn" class="w-12 h-12 rounded-xl bg-[#D4A017] hover:bg-[#A67C00] text-slate-950 font-bold flex items-center justify-center flex-shrink-0 transition shadow-md shadow-[#D4A017]/20 active:scale-95">
+          <svg class="w-5 h-5 rotate-180" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- TAB 2: آلارم و یادآور مصرف دارو (Medication Reminders) -->
+    <section id="tab-alarms" class="tab-content hidden space-y-4">
+      <!-- Header Banner & Add Form -->
+      <div class="bg-[#141B2B] border border-[#2C3955] rounded-2xl p-4 shadow-md">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-xl bg-[#D4A017]/20 flex items-center justify-center text-[#D4A017]">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+              <h2 class="text-base font-bold text-slate-100">تنظیم آلارم و هشدار دارو</h2>
+              <p class="text-xs text-slate-400">زنگ هشدار دقیق با اعلان و صدا</p>
+            </div>
+          </div>
+          <button id="reqNotificationBtn" class="text-xs bg-[#10B981]/20 border border-[#10B981]/40 text-emerald-300 px-3 py-1.5 rounded-lg flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
+            <span>فعال‌سازی مجوز اعلان</span>
+          </button>
+        </div>
+
+        <!-- Add Reminder Input Card -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">نام دارو</label>
+            <input type="text" id="alarmMedName" placeholder="مثلاً: متفورمین ۵۰۰" class="w-full bg-[#0C101A] border border-[#2C3955] focus:border-[#D4A017] rounded-xl px-3 py-2 text-sm text-slate-100 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">دوز و نحوه مصرف</label>
+            <input type="text" id="alarmDosage" placeholder="مثلاً: ۱ عدد بعد از ناهار با آب" class="w-full bg-[#0C101A] border border-[#2C3955] focus:border-[#D4A017] rounded-xl px-3 py-2 text-sm text-slate-100 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">ساعت مصرف</label>
+            <input type="time" id="alarmTime" class="w-full bg-[#0C101A] border border-[#2C3955] focus:border-[#D4A017] rounded-xl px-3 py-2 text-sm text-slate-100 outline-none">
+          </div>
+          <div class="flex items-center justify-between pt-5 px-1">
+            <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-200">
+              <input type="checkbox" id="alarmDaily" checked class="w-4 h-4 accent-[#D4A017] rounded">
+              <span>تکرار روزانه در همین ساعت</span>
+            </label>
+            <button id="saveAlarmBtn" class="bg-[#D4A017] hover:bg-[#A67C00] text-slate-950 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              <span>افزودن آلارم</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Alarms List -->
+      <div class="space-y-3">
+        <h3 class="text-sm font-bold text-slate-300 flex items-center gap-1.5">
+          <span>لیست آلارم‌های فعال</span>
+          <span id="alarmCountBadge" class="bg-[#D4A017]/20 text-[#F3C760] text-xs px-2 py-0.5 rounded-full">۰</span>
+        </h3>
+        <div id="alarmsList" class="space-y-2.5">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: تاریخچه مصرف دارو (Medication History) -->
+    <section id="tab-history" class="tab-content hidden space-y-4">
+      <div class="bg-[#141B2B] border border-[#2C3955] rounded-2xl p-4 shadow-md flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-bold text-slate-100">تاریخچه مصرف و مشاوره‌ها</h2>
+          <p class="text-xs text-slate-400">ثبت ۱۰۰٪ در localStorage گوشی شما</p>
+        </div>
+        <button id="clearHistoryBtn" class="text-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 px-3 py-1.5 rounded-xl transition flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          <span>پاکسازی تاریخچه</span>
+        </button>
+      </div>
+
+      <!-- Filter tabs -->
+      <div class="flex items-center gap-2 text-xs">
+        <button class="history-filter active-filter bg-[#D4A017]/20 border border-[#D4A017] text-[#F3C760] px-3.5 py-1.5 rounded-full font-medium" data-filter="ALL">همه موارد</button>
+        <button class="history-filter bg-[#1D263B] border border-[#2C3955] text-slate-300 px-3.5 py-1.5 rounded-full font-medium" data-filter="TAKEN">مصرف‌شده‌ها</button>
+        <button class="history-filter bg-[#1D263B] border border-[#2C3955] text-slate-300 px-3.5 py-1.5 rounded-full font-medium" data-filter="CONSULTATION">مشاوره‌ها</button>
+        <button class="history-filter bg-[#1D263B] border border-[#2C3955] text-slate-300 px-3.5 py-1.5 rounded-full font-medium" data-filter="ALARM">زنگ‌های هشدار</button>
+      </div>
+
+      <!-- Timeline List -->
+      <div id="historyTimeline" class="space-y-2.5">
+        <!-- Populated by JavaScript -->
+      </div>
+    </section>
+
+    <!-- TAB 4: بانک اطلاعات دارویی (Drug Bank) -->
+    <section id="tab-drugs" class="tab-content hidden space-y-4">
+      <div class="bg-[#141B2B] border border-[#2C3955] rounded-2xl p-4 shadow-md">
+        <div class="relative">
+          <input type="text" id="drugSearchInput" placeholder="جستجوی نام دارو (مثلاً متفورمین، لوزارتان، ژلوفن...)" 
+                 class="w-full bg-[#0C101A] border border-[#2C3955] focus:border-[#D4A017] rounded-xl pr-10 pl-4 py-2.5 text-sm text-slate-100 outline-none">
+          <svg class="w-5 h-5 text-[#D4A017] absolute right-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+
+        <!-- Categories chips -->
+        <div class="flex items-center gap-2 overflow-x-auto mt-3 pb-1 text-xs scrollbar-none" id="drugCategories">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Drugs Cards Grid -->
+      <div id="drugsListGrid" class="space-y-3">
+        <!-- Populated by JavaScript -->
+      </div>
+    </section>
+
+    <!-- TAB 5: عیب‌یابی و کنسول توسعه (Experimental Debug Mod
